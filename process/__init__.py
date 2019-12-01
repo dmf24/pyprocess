@@ -109,7 +109,7 @@ def pipestring_process(cmd_string, stdin_string=''):
     >>> pipestring_process('grep 2', '1\\n2\\n3\\n')
     (0, '2\\n', '')
     """
-    f=SpooledTemporaryFile()
+    f=SpooledTemporaryFile(mode='w')
     f.write(stdin_string)
     f.seek(0)
     results=process(cmd_string, stdin=f)
