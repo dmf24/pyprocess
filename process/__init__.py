@@ -13,15 +13,14 @@ __all__ = ['validate_sudo', 'dangerous_process', 'pipestring_process', 'poll_pro
            'process', 'process_results', 'process_run', 'processes',
            'run_processes', 'subprocess', 'typical_process']
 
-# misc
-
-def validate_sudo():
-    subprocess.call(['sudo', '-v'])
-
 # For Python 2.7 compatibility without causing
 # flake8 to lose its mind.
 if sys.version_info.major == 3:
-    raw_input=input
+    raw_input = input
+
+
+def validate_sudo():
+    subprocess.call(['sudo', '-v'])
 
 
 def process_run(cmd_string, stdin=None):
@@ -50,11 +49,12 @@ def process_results(process_object):
     >>> stderr
     ''
     """
-    (stdout, stderr)=process_object.communicate()
+    (stdout, stderr) = process_object.communicate()
     if sys.version_info.major == 2:
         return (process_object.returncode, stdout, stderr)
     elif sys.version_info.major == 3:
         return (process_object.returncode, stdout.decode('UTF-8'), stderr.decode('UTF-8'))
+
 
 def run_processes(cmdlist):
     """ Run a list of processes and return the list of objects without
@@ -66,6 +66,7 @@ def run_processes(cmdlist):
     """
     return [process_run(cmd) for cmd in cmdlist]
 
+
 def processes(cmdlist):
     """Spawns a list of processes in rapid succession, then waits for all of them
     to exit.  Returns a list of result tuples [(exitcode, stdin, stderr), ...]
@@ -74,6 +75,7 @@ def processes(cmdlist):
     [(0, 'process 1\\n', ''), (0, 'process 2\\n', '')]
     """
     return [process_results(proc) for proc in run_processes(cmdlist)]
+
 
 def poll_processes(proclist, wait=3, tries=3, debug=None):
     """Given a list of process objects, poll each process in the list
@@ -88,7 +90,7 @@ def poll_processes(proclist, wait=3, tries=3, debug=None):
         sys.stderr.write("polling...\n")
     for proc in proclist:
         proc.poll()
-    if tries!=0 and None in [proc.returncode for proc in proclist]:
+    if tries != 0 and None in [proc.returncode for proc in proclist]:
         if debug:
             sys.stderr.write("Some processes not finished, sleeping %s seconds...\n" % wait)
         time.sleep(wait)
@@ -112,10 +114,10 @@ def pipestring_process(cmd_string, stdin_string=''):
     >>> pipestring_process('grep 2', '1\\n2\\n3\\n')
     (0, '2\\n', '')
     """
-    f=SpooledTemporaryFile(mode='w')
+    f = SpooledTemporaryFile(mode='w')
     f.write(stdin_string)
     f.seek(0)
-    results=process(cmd_string, stdin=f)
+    results = process(cmd_string, stdin=f)
     f.close()
     return results
 
@@ -130,9 +132,9 @@ def typical_process(cmd_string, error_message='', stdin=None, stdout=None, stder
     Return (exitcode, stdout, stderr) for zero return codes."""
 
     if stdout is None:
-        stdout=sys.stdout
+        stdout = sys.stdout
     if stderr is None:
-        stderr=sys.stderr
+        stderr = sys.stderr
 
     results = process(cmd_string, stdin=stdin)
     stderr.write(results[2])
@@ -159,6 +161,7 @@ def dangerous_process(cmd_string, error_message='', stdin=None, stdout=None,
                         stdout=stdout,
                         stderr=stderr)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     import doctest
     doctest.testmod()
