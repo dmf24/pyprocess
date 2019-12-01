@@ -50,7 +50,10 @@ def process_results(process_object):
     ''
     """
     (stdout, stderr)=process_object.communicate()
-    return (process_object.returncode, stdout, stderr)
+    if sys.version_info.major == 2:
+        return (process_object.returncode, stdout, stderr)
+    elif sys.version_info.major == 3:
+        return (process_object.returncode, stdout.decode('UTF-8'), stderr.decode('UTF-8'))
 
 def run_processes(cmdlist):
     """ Run a list of processes and return the list of objects without
