@@ -1,26 +1,27 @@
 """
 
- This is a library for miscellanous scripting support functions
+ This is a library for subprocess wrappers
 
 """
-import sys, os
+import sys
 import subprocess
 import shlex
 from tempfile import SpooledTemporaryFile
 import time
 
-__all__=['validate_sudo', 'dangerous_process', 'pipestring_process', 'poll_processes', 'process', 'process_results', 'process_run', 'processes', 'run_processes', 'subprocess', 'typical_process']
+__all__ = ['validate_sudo', 'dangerous_process', 'pipestring_process', 'poll_processes',
+           'process', 'process_results', 'process_run', 'processes',
+           'run_processes', 'subprocess', 'typical_process']
 
 # misc
 
 def validate_sudo():
     subprocess.call(['sudo', '-v'])
 
-# Subprocess wrappers
-
-#
-# Some simple wrappers for subprocess for common use cases.
-#
+# For Python 2.7 compatibility without causing
+# flake8 to lose its mind.
+if sys.version_info.major == 3:
+    raw_input=input
 
 
 def process_run(cmd_string, stdin=None):
@@ -33,14 +34,14 @@ def process_run(cmd_string, stdin=None):
     True
     """
     return subprocess.Popen(shlex.split(cmd_string),
-                                    stdin=stdin,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
+                            stdin=stdin,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
 
 def process_results(process_object):
     """Given a process object, wait for it to complete then return a tuple:
-    
+
     >>> (returncode, stdout, stderr) = process_results(process_run('echo my process'))
     >>> returncode
     0
@@ -58,7 +59,7 @@ def process_results(process_object):
 def run_processes(cmdlist):
     """ Run a list of processes and return the list of objects without
     waiting for results
-    
+
     >>> process_objects=run_processes(['echo one', 'echo two'])
     >>> [isinstance(obj, subprocess.Popen) for obj in process_objects]
     [True, True]
@@ -79,7 +80,7 @@ def poll_processes(proclist, wait=3, tries=3, debug=None):
     and update return codes.  Pull the list 'tries' times and wait 'wait'
     seconds between tries
 
-    >>> process_objects=poll_processes(run_processes(['echo one', 'echo two']))    
+    >>> process_objects=poll_processes(run_processes(['echo one', 'echo two']))
     >>> [isinstance(obj.returncode, int) for obj in process_objects]
     [True, True]
     """
@@ -91,17 +92,19 @@ def poll_processes(proclist, wait=3, tries=3, debug=None):
         if debug:
             sys.stderr.write("Some processes not finished, sleeping %s seconds...\n" % wait)
         time.sleep(wait)
-        poll_processes(proclist, wait=wait, tries=tries-1)
+        poll_processes(proclist, wait=wait, tries=tries - 1)
     return proclist
+
 
 def process(cmd_string, stdin=None):
     """Given a string representing a single command, open a process, wait for it to terminate and then
     return standard out and standard in as a tuple
-    
+
     >>> process("echo 1 2")
     (0, '1 2\\n', '')
     """
     return process_results(process_run(cmd_string, stdin=stdin))
+
 
 def pipestring_process(cmd_string, stdin_string=''):
     """Pipe a python string to standard input for cmd_string
@@ -115,6 +118,7 @@ def pipestring_process(cmd_string, stdin_string=''):
     results=process(cmd_string, stdin=f)
     f.close()
     return results
+
 
 def typical_process(cmd_string, error_message='', stdin=None, stdout=None, stderr=None):
     """Call a process, write the results to stdout and stderr, and for nonzero
@@ -138,10 +142,6 @@ def typical_process(cmd_string, error_message='', stdin=None, stdout=None, stder
         sys.exit(results[0])
     return results
 
-# For Python 2.7 compatibility without causing
-# flake8 to lose its mind.
-if sys.version_info.major == 3:
-    raw_input=input
 
 def dangerous_process(cmd_string, error_message='', stdin=None, stdout=None,
                       stderr=None, sudo=False):
